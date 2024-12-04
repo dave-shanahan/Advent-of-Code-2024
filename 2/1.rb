@@ -1,29 +1,38 @@
 safe_reports = 0
 
-def check_sort(report)
+def valid_sort?(report)
   sorts = [report.sort { |a, b| a <=> b }, report.sort { |a, b| b <=> a }]
-
   true if sorts.include?(report)
 end
 
-def check_levels(report)
+def contains_valid_levels?(report)
   report.each_index do |index|
-    # puts "Level: #{report[index]}, Index: #{index}"
-    puts "Level: #{report[index].class}"
-    # break if index == 2
+    if index != 0
+      prior_difference = (report[index] - report[index-1]).abs
+      return false unless within_permitted_range?(prior_difference)
+    end
+
+    if index != report.length - 1
+      post_difference = (report[index] - report[index+1]).abs
+      return false unless within_permitted_range?(post_difference)
+    end
   end
+  true
 end
 
-File.foreach('example_input.txt') do |line|
+def within_permitted_range?(difference)
+  (difference > 0) && (difference <= 3)
+end
+
+File.foreach('input.txt') do |line|
   report = line.split.map(&:to_i)
 
-  # a.sort {|a, b| a <=> b } ==
-
   puts "Report: #{report}"
+  
+  if valid_sort?(report) && contains_valid_levels?(report)
+    safe_reports += 1
+  end
 
-  # if check_sort(report)
-
-  # end
-
-  check_levels(report)
 end
+
+puts "Safe Reports: #{safe_reports}"
